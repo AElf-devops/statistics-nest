@@ -36,7 +36,7 @@ export class StatisticsService {
     console.log('result', result.data);
     const data = {
       ...result.data.data,
-      supplyExcludeEcosystemIncentives: new BigNumber(result.data.data.supply).minus(balanceOfEcosystemIncentives).toString()
+      circulatingSupply: new BigNumber(result.data.data.supply).minus(balanceOfEcosystemIncentives).toString()
     }
     return {
       ...result.data,
