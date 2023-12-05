@@ -3,6 +3,7 @@ import { StatisticsService } from './statistics.service';
 import { MarketStatisticsService } from './market.statistics.service';
 import {CoinDto} from './dto/market.dto';
 import {ErrorDto} from '../dto/error.dto';
+import {SuccessDto} from '../dto/success.dto';
 
 @Controller('statistics')
 export class StatisticsController {
@@ -23,14 +24,18 @@ export class StatisticsController {
   }
 
   @Get('market')
-  async getMarketInfo(@Query('symbol') symbol: string): Promise<CoinDto[] | ErrorDto> {
+  async getMarketInfo(@Query('symbol') symbol: string): Promise<SuccessDto<CoinDto[]> | ErrorDto> {
     if (symbol !== 'ELF') {
       return {
         msg: 'only supply ELF',
         code: -1,
       }
     }
-    return this.marketStatisticsService.getMarketInfoWithCache(symbol);
+    return {
+      msg: "success",
+      code: 0,
+      data: await this.marketStatisticsService.getMarketInfoWithCache(symbol)
+    };
   }
 
   // Test only
