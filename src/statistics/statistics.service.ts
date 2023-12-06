@@ -2,7 +2,7 @@ import {Injectable, Logger, Param} from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import {HttpService} from '@nestjs/axios';
 import {ConfigService} from '@nestjs/config';
-import {AelfWeb3Service} from '../aelf.web3.service';
+import {AelfWeb3Service} from '../web3/aelf.web3.service';
 
 let balanceOfEcosystemIncentivesCache: {
   balance: BigNumber,
