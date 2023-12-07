@@ -8,7 +8,7 @@ import {AelfWeb3Service} from '../web3/aelf.web3.service';
 import {TasksController} from './task.controller';
 
 @Module({
-  imports: [StatisticsModule, HttpModule],
+  imports: [HttpModule],
   controllers: [TasksController],
   providers: [TasksService, StatisticsService, MarketStatisticsService, AelfWeb3Service],
 })
