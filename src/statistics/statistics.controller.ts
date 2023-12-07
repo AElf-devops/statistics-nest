@@ -1,9 +1,8 @@
-import {Controller, Get, Param, Query} from '@nestjs/common';
-import { StatisticsService } from './statistics.service';
-import { MarketStatisticsService } from './market.statistics.service';
+import {Controller, Get, Query} from '@nestjs/common';
+import {StatisticsService} from './statistics.service';
+import {MarketStatisticsService} from './market.statistics.service';
 import {CoinDto} from './dto/market.dto';
 import {ErrorDto} from '../dto/error.dto';
-import {SuccessDto} from '../dto/success.dto';
 
 @Controller('statistics')
 export class StatisticsController {
@@ -24,18 +23,24 @@ export class StatisticsController {
   }
 
   @Get('market')
-  async getMarketInfo(@Query('symbol') symbol: string): Promise<SuccessDto<CoinDto[]> | ErrorDto> {
+  async getMarketInfo(@Query('symbol') symbol: string): Promise<CoinDto[] | ErrorDto> {
     if (symbol !== 'ELF') {
       return {
         msg: 'only supply ELF',
         code: -1,
       }
     }
-    return {
-      msg: "success",
-      code: 0,
-      data: await this.marketStatisticsService.getMarketInfoWithCache(symbol)
-    };
+    return await this.marketStatisticsService.getMarketInfoWithCache(symbol);
+    // upbit just need to return the result
+    // if (exchange === 'upbit') {
+    //   return result;
+    // }
+    //
+    // return {
+    //   msg: "success",
+    //   code: 0,
+    //   data: result
+    // };
   }
 
   // Test only
