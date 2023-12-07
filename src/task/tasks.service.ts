@@ -12,7 +12,7 @@ export class TasksService {
     private readonly marketStatisticsService: MarketStatisticsService,
   ) {}
 
-  @Cron('* 30 * * * *')
+  @Cron('*/30 * * * *')
   handleCron() {
     this.logger.log('Called when the current minutes is 30');
     this.statisticsService.getTokenInfo('ELF');
