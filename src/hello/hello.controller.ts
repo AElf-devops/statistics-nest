@@ -79,7 +79,6 @@ export class HelloController {
   async cache(@Query('cache') cache: string): Promise<any> {
     console.log('cache test');
     const cacheValue = await this.cacheManager.get('hello-cache');
-    // const cacheValue = await this..;
     this.logger.log('cacheValue: ' + cacheValue, cache);
     if (cacheValue) {
       return cacheValue;

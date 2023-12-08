@@ -1,19 +1,21 @@
-import {Injectable, Logger} from '@nestjs/common';
+import {Inject, Injectable, Logger} from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import {HttpService} from '@nestjs/axios';
 import {ConfigService} from '@nestjs/config';
 import {CoinDto} from './dto/market.dto';
 import {StatisticsService} from './statistics.service';
 import { catchError, firstValueFrom } from 'rxjs';
+import {CACHE_MANAGER} from '@nestjs/cache-manager';
+import {Cache} from 'cache-manager';
 
 interface IVolume24h {
   [key: string]: number
 }
 
-let coinsDataCache: {
+interface ICoinsDataCache {
   timestamp: number,
   data: CoinDto[]
-};
+}
 
 @Injectable()
 export class MarketStatisticsService {
@@ -22,7 +24,8 @@ export class MarketStatisticsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-    private readonly statisticsService: StatisticsService
+    private readonly statisticsService: StatisticsService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.getMarketInfoWithCacheLock = false;
   }
@@ -63,6 +66,7 @@ export class MarketStatisticsService {
 
   async getMarketInfoWithCache(symbol: string): Promise<CoinDto[]> {
     const cacheExpireTime= this.configService.get('CACHE_EXPIRE_TIME_OF_TOKEN_MARKET_INFO');
+    const coinsDataCache: ICoinsDataCache = await this.cacheManager.get('coinsDataCache');
     if (!coinsDataCache) {
       return await this.updateMarketInfo(symbol);
     }
@@ -115,10 +119,11 @@ export class MarketStatisticsService {
         lastUpdatedTimestamp: new Date().getTime()
       }
     });
-    coinsDataCache = {
+    const coinsDataCache: ICoinsDataCache = {
       timestamp: new Date().getTime(),
       data: coinsData
     };
+    await this.cacheManager.set('coinsDataCache', coinsDataCache, {ttl: 0} );
 
     return coinsData;
   }

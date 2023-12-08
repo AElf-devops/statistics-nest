@@ -1,13 +1,15 @@
-import {Injectable, Logger, Param} from '@nestjs/common';
+import {Inject, Injectable, Logger, Param} from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import {HttpService} from '@nestjs/axios';
 import {ConfigService} from '@nestjs/config';
 import {AelfWeb3Service} from '../web3/aelf.web3.service';
+import {CACHE_MANAGER} from '@nestjs/cache-manager';
+import {Cache} from 'cache-manager';
 
-let balanceOfEcosystemIncentivesCache: {
+interface IBalanceOfEcosystemIncentivesCache {
   balance: BigNumber,
   timestamp: number
-};
+}
 
 let tokenContract;
 
@@ -20,7 +22,8 @@ export class StatisticsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-    private readonly aelfWeb3Service: AelfWeb3Service
+    private readonly aelfWeb3Service: AelfWeb3Service,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.testStr = 'testStr';
     this.balanceRefreshLock = false;
@@ -53,14 +56,16 @@ export class StatisticsService {
       );
       this.logger.log('token contract init end');
     }
+    const balanceOfEcosystemIncentivesCache: IBalanceOfEcosystemIncentivesCache
+      = await this.cacheManager.get('balanceOfEcosystemIncentivesCache');
     if (!balanceOfEcosystemIncentivesCache) {
       this.logger.log('no cache');
       const balanceOfEcosystemIncentives: BigNumber
         = await this.getTotalBalanceOfAddresses(symbol, tokenContract, this.EXCLUDE_ADDRESSES);
-      balanceOfEcosystemIncentivesCache = {
+      await this.cacheManager.set('balanceOfEcosystemIncentivesCache', {
         balance: balanceOfEcosystemIncentives,
         timestamp: Date.now()
-      }
+      }, { ttl: 0 })
       return balanceOfEcosystemIncentives;
     }
 
